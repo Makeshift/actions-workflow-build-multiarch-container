@@ -135,12 +135,12 @@ jobs:
         platform: ${{ fromJSON(inputs.PLATFORMS) }}
     runs-on:
       - self-hosted
-      - ${{ fromJSON(inputs.PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
+      - ${{ fromJSON(needs.setup.outputs.platforms)[matrix.platform] }}
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
-        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username }}
-        password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
+        username: ${{ needs.setup.outputs.docker_username }}
+        password: ${{ needs.setup.outputs.docker_password }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -179,8 +179,8 @@ jobs:
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
-        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username }}
-        password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
+        username: ${{ needs.setup.outputs.docker_username }}
+        password: ${{ needs.setup.outputs.docker_password }}
     steps:
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1
