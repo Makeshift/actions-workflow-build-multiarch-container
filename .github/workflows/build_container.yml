@@ -127,47 +127,46 @@ jobs:
       final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
       expected_source_tags: ${{ steps.set.outputs.EXPECTED_SOURCE_TAGS }}
 
-  # build:
-  #   name: Build Container
-  #   needs: setup
-  #   strategy:
-  #     matrix:
-  #       platform: ${{ fromJSON(inputs.PLATFORMS) }}
-  #   runs-on:
-  #     - self-hosted
-  #     - ${{ fromJSON(PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
-  #   container:
-  #     image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
-  #     credentials:
-  #       username: ${{ needs.login-to-amazon-ecr.outputs.docker_username } }}
-  #       password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  build:
+    name: Build Container
+    needs: setup
+    strategy:
+      matrix:
+        platform: ${{ fromJSON(inputs.PLATFORMS) }}
+    runs-on:
+      - self-hosted
+      - ${{ fromJSON(PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
+    container:
+      image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
+      credentials:
+        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username } }}
+        password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
-  #       id: metadata
-  #       uses: docker/metadata-action@v4.1.1
-  #       with:
-  #         images: ${{ inputs.AWS_ECR_REPOSITORY }}
-  #         tags: |
-  #           type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}-${{ matrix.platform }}
+      - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
+        id: metadata
+        uses: docker/metadata-action@v4.1.1
+        with:
+          images: ${{ inputs.AWS_ECR_REPOSITORY }}
+          tags: |
+            type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}
 
-  #     - name: Build ${{ inputs.DOCKERFILE }}
-  #       uses: ./.github/actions/build-and-push-container
-  #       with:
-  #         AWS_ECR_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-  #         AWS_ECR_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-  #         AWS_ECR_REGION: eu-west-2
-  #         AWS_ECR_REPOSITORY: ${{ inputs.AWS_ECR_REPOSITORY }}
-  #         PLATFORMS: ${{ matrix.platform }}
-  #         DOCKERFILE: ${{ inputs.DOCKERFILE }}
-  #         BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
-  #         BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
-  #         TAG_SUFFIX: ${{ inputs.TAG_SUFFIX }}-${{ matrix.platform }
-  #         ARTIFACTS: ${{ inputs.ARTIFACTS }}
-  #         METADATA: ${{ steps.metadata.outputs }}
-  #         ENV_VARS: ${{ inputs.ENV_VARS }}
+      - name: Build ${{ inputs.DOCKERFILE }}
+        uses: ./.github/actions/build-and-push-container
+        with:
+          AWS_ECR_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_ECR_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_ECR_REGION: eu-west-2
+          AWS_ECR_REPOSITORY: ${{ inputs.AWS_ECR_REPOSITORY }}
+          PLATFORMS: ${{ matrix.platform }}
+          DOCKERFILE: ${{ inputs.DOCKERFILE }}
+          BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
+          BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
+          ARTIFACTS: ${{ inputs.ARTIFACTS }}
+          METADATA: ${{ steps.metadata.outputs }}
+          ENV_VARS: ${{ inputs.ENV_VARS }}
 
   build_manifest:
     name: Create manifests & Tags
@@ -175,6 +174,11 @@ jobs:
       - setup
     runs-on:
       - self-hosted
+    container:
+      image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
+      credentials:
+        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username } }}
+        password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
     steps:
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1

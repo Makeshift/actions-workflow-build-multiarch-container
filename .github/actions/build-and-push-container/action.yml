@@ -32,10 +32,6 @@ inputs:
     description: Build arguments to pass to the docker builder (Newline separated string of KEY=VAR)
     required: false
     default: ''
-  TAG_SUFFIX:
-    description: Tag suffix to append to the image tags
-    required: false
-    default: ''
   ARTIFACTS:
     description: Comma separated list of artifacts within the container to upload as build artifacts (Debug logs etc)
     required: false
@@ -136,30 +132,30 @@ runs:
           steps.dockerfile_underscored.outputs.value }},mode=max
         build-args: ${{ inputs.BUILD_ARGS }}
 
-    - name: Get Artifacts From Container
-      if: success() && inputs.ARTIFACTS != ''
-      shell: bash
-      id: output-dir
-      run: |
-        docker create --name temp ${{ inputs.AWS_ECR_REPOSITORY }}:${{ github.sha }}${{ inputs.TAG_SUFFIX }}
-        # Remove spaces around commas, assuming the user doesn't have a file name with a space and a comma
-        #  next to each other
-        files=$(echo '${{ inputs.ARTIFACTS }}' | sed 's/\s*,\s*/,/g')
-        output_dir=$(mktemp -d)
-        # Replace commas with spaces, intentionally not using bash string manip
-        #  because that breaks values with spaces
-        for file in $files; do
-          docker cp "temp:${file}" "${output_dir}/"
-        done
-        docker rm temp
-        echo "value=${output_dir}" | tee -a $GITHUB_OUTPUT
+    # - name: Get Artifacts From Container
+    #   if: success() && inputs.ARTIFACTS != ''
+    #   shell: bash
+    #   id: output-dir
+    #   run: |
+    #     docker create --name temp ${{ inputs.AWS_ECR_REPOSITORY }}:${{ github.sha }}${{ inputs.TAG_SUFFIX }}
+    #     # Remove spaces around commas, assuming the user doesn't have a file name with a space and a comma
+    #     #  next to each other
+    #     files=$(echo '${{ inputs.ARTIFACTS }}' | sed 's/\s*,\s*/,/g')
+    #     output_dir=$(mktemp -d)
+    #     # Replace commas with spaces, intentionally not using bash string manip
+    #     #  because that breaks values with spaces
+    #     for file in $files; do
+    #       docker cp "temp:${file}" "${output_dir}/"
+    #     done
+    #     docker rm temp
+    #     echo "value=${output_dir}" | tee -a $GITHUB_OUTPUT
 
-    - name: Upload Artifacts
-      if: success() && inputs.ARTIFACTS != ''
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ steps.dockerfile_underscored.outputs.value }}
-        path: ${{ steps.output-dir.outputs.value }}
+    # - name: Upload Artifacts
+    #   if: success() && inputs.ARTIFACTS != ''
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{ steps.dockerfile_underscored.outputs.value }}
+    #     path: ${{ steps.output-dir.outputs.value }}
 
     - name: Output tags
       if: success()
