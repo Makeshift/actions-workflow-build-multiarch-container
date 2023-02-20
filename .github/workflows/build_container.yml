@@ -87,17 +87,33 @@ jobs:
             # set latest tag for master branch
             type=raw,value=latest,enable=${{ github.ref_name == 'master' || github.ref_name == 'main' }},suffix=${{ inputs.TAG_SUFFIX }}
 
-      # - name: For Each Platform, Generate Metadata
-      #   id: set
-      #   run: |
-      #     PLATFORMS=${{ inputs.PLATFORMS }}
-      #     MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
-      #     IMAGE_SUFFIX=${{ steps.metadata.outputs.}}
-      #     FINAL_IMAGE_LIST=""
-      #     for i in ${PLATFORMS//,/ }; do
-      #       echo "$MAPPING" | jq -r --arg platform "$i" '.[$platform]'
-      #     done
-      #     tag_prefix="${{ steps.metadata.outputs.tags }}"
+      - name: Platform Metadata
+        id: platform-metadata
+        uses: docker/metadata-action@v4.1.1
+        with:
+          images: ${{ inputs.AWS_ECR_REPOSITORY }}
+          tags: |
+            type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}
+
+      - name: For Each Platform, Generate Metadata
+        id: set
+        run: |
+
+          FINAL_IMAGE_TAGS=$(echo ${{ steps.metadata.outputs.tags }} | jq -Rc 'join(",")')
+          first_expected_source_tag=$(echo "${{steps.platform-metadata.outputs.tags[0]}}")
+
+          PLATFORMS=${{ inputs.PLATFORMS }}
+          MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
+
+          echo "$FINAL_IMAGE_TAGS"
+          echo $first_expected_source_tag
+          echo $PLATFORMS
+          echo $MAPPING
+
+          # for i in ${PLATFORMS//,/ }; do
+          #   echo "$MAPPING" | jq -r --arg platform "$i" --arg tag "$first_expected_source_tag" '$tag.[$platform]'
+          # done
+          # tag_prefix="${{ steps.metadata.outputs.tags }}"
 
     outputs:
       registry: ${{ steps.login-ecr.outputs.registry }}
@@ -105,6 +121,8 @@ jobs:
       docker_password: ${{ steps.login-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       platforms: ${{ steps.calculate-platforms.outputs.result }}
       metadata: ${{ toJson(steps.metadata.outputs) }}
+      final_image_tags: ${{ steps.set.outputs.final_image_tags }}
+      expected_source_tags: ${{ steps.set.outputs.expected_source_tags }}
 
   # build:
   #   name: Build Container
@@ -148,16 +166,16 @@ jobs:
   #         METADATA: ${{ steps.metadata.outputs }}
   #         ENV_VARS: ${{ inputs.ENV_VARS }}
 
-  # build_manifest:
-  #   name: Create manifests & Tags
-  #   needs:
-  #     - setup
-  #   runs-on:
-  #     - self-hosted
-  #   steps:
-  #     - name: Create and push manifest images
-  #       uses: Makeshift/docker-manifest-action@master
-  #       with:
-  #         base-image: ${{ needs.setup.outputs.metadata.tags }}
-  #         extra-images: ${{ needs.vars.outputs.image_list }}
-  #         push: true
+  build_manifest:
+    name: Create manifests & Tags
+    needs:
+      - setup
+    runs-on:
+      - self-hosted
+    steps:
+      - name: Create and push manifest images
+        uses: Noelware/docker-manifest-action@0.3.1
+        with:
+          base-image: ${{ needs.setup.outputs.metadata.tags }}
+          extra-images: ${{ needs.vars.outputs.image_list }}
+          push: true
