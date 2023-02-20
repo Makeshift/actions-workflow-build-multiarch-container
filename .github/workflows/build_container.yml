@@ -102,7 +102,7 @@ jobs:
           FINAL_IMAGE_TAGS=$(echo ${{ steps.metadata.outputs.tags }} | jq -Rc 'join(",")')
           echo "FINAL_IMAGE_TAGS=$FINAL_IMAGE_TAGS" >> "$GITHUB_OUTPUT"
 
-          platform_tag_prefix=$(echo "${{fromJSON(steps.platform-metadata.outputs.tags)[0]}}")
+          platform_tag_prefix=$(echo "${{ steps.platform-metadata.outputs.tags }" | jq -r 'first')
 
           PLATFORMS=${{ inputs.PLATFORMS }}
           MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
@@ -114,7 +114,7 @@ jobs:
             expected_source_tags="$expected_source_tags,$new_source_tag"
           done
 
-          echo "EXPECTED_SOURCE_TAGS=$EXPECTED_SOURCE_TAGS" >> "$GITHUB_OUTPUT"
+          echo "EXPECTED_SOURCE_TAGS=$expected_source_tags" >> "$GITHUB_OUTPUT"
 
     outputs:
       registry: ${{ steps.login-ecr.outputs.registry }}
