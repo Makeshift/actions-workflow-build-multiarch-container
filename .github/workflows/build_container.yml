@@ -139,7 +139,7 @@ jobs:
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
-        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username } }}
+        username: ${{ needs.login-to-amazon-ecr.outputs.docker_username }}
         password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
     steps:
       - name: Checkout
