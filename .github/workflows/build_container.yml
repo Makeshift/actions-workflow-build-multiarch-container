@@ -99,19 +99,21 @@ jobs:
         id: set
         run: |
 
-          FINAL_IMAGE_TAGS=$(echo "${{ steps.metadata.outputs.tags }}" | jq -Rc 'join(",")')
+          FINAL_IMAGE_TAGS=$(echo "${{ steps.metadata.outputs.tags }}" | tr '\n' ',')
           echo "FINAL_IMAGE_TAGS=$FINAL_IMAGE_TAGS" >> "$GITHUB_OUTPUT"
 
-          platform_tag_prefix=$(echo "${{ steps.platform-metadata.outputs.tags }}" | jq -r 'first')
+          platform_tag_prefix="${{ steps.platform-metadata.outputs.tags }}"
 
           PLATFORMS=${{ inputs.PLATFORMS }}
-          MAPPING="${{ inputs.PLATFORM_TO_ARCH_MAP }}"
-
-          expected_source_tags=""
+          MAPPING='${{ inputs.PLATFORM_TO_ARCH_MAP }}'
 
           for i in ${PLATFORMS//,/ }; do
-            new_source_tag=$(echo '$MAPPING' | jq -r --arg platform "$i" --arg tag "$platform_tag_prefix" '.[$platform] | "\($tag)-\(.)"')
-            expected_source_tags="$expected_source_tags,$new_source_tag"
+            new_source_tag=$(echo "$MAPPING" | jq -r --arg platform "$i" --arg tag "$platform_tag_prefix" '.[$platform] | "\($tag)-\(.)"')
+            if [ -z "$expected_source_tags" ]; then
+              expected_source_tags="$new_source_tag"
+            else
+              expected_source_tags="$expected_source_tags,$new_source_tag"
+            fi
           done
 
           echo "EXPECTED_SOURCE_TAGS=$expected_source_tags" >> "$GITHUB_OUTPUT"
