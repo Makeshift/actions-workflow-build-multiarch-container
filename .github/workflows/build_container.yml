@@ -132,7 +132,7 @@ jobs:
     needs: setup
     strategy:
       matrix:
-        platform: ${{ fromJSON(inputs.PLATFORMS) }}
+        platform: ${{ fromJSON(needs.setup.outputs.platforms) }}
     runs-on:
       - self-hosted
       - ${{ fromJSON(needs.setup.outputs.platforms)[matrix.platform] }}
