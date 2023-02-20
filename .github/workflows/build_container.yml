@@ -104,7 +104,7 @@ jobs:
       docker_username: ${{ steps.login-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       docker_password: ${{ steps.login-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       platforms: ${{ steps.calculate-platforms.outputs.result }}
-      metadata: ${{ steps.metadata.outputs }}
+      metadata: ${{ toJson(steps.metadata.outputs) }}
 
   # build:
   #   name: Build Container
