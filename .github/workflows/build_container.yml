@@ -172,6 +172,7 @@ jobs:
     name: Create manifests & Tags
     needs:
       - setup
+    if: success()
     runs-on:
       - self-hosted
     container:
