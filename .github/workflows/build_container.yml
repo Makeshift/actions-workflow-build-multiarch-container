@@ -135,7 +135,7 @@ jobs:
         platform: ${{ fromJSON(needs.setup.outputs.platforms) }}
     runs-on:
       - self-hosted
-      - ${{ fromJSON(needs.setup.outputs.platforms)[matrix.platform] }}
+      - ${{ fromJSON(inputs.PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
