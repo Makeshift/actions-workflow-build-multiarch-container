@@ -13,6 +13,7 @@ on:
       BUILD_CONTEXT:
         description: Build context used by the docker builder (. to reference top of Git repo, DOCKERFILE_DIRNAME to reference Dockerfile directory - Either BUILD_CONTEXT or DOCKERFILE or both must be specified)
         required: false
+        type: string
         default: DOCKERFILE_DIRNAME
       BUILD_ARGS:
         description: 'The build arguments to pass to the Docker build'
