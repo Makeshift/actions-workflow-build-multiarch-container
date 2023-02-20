@@ -135,7 +135,7 @@ jobs:
         platform: ${{ fromJSON(inputs.PLATFORMS) }}
     runs-on:
       - self-hosted
-      - ${{ fromJSON(PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
+      - ${{ fromJSON(inputs.PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
@@ -172,6 +172,7 @@ jobs:
     name: Create manifests & Tags
     needs:
       - setup
+      - build
     if: success()
     runs-on:
       - self-hosted
