@@ -65,7 +65,9 @@ jobs:
 
       - name: Calculate Platforms
         id: calculate-platforms
-        run: echo ${{ inputs.PLATFORMS }} | jq -Rc 'split(",")' >> "$GITHUB_OUTPUT"
+        run: |
+          PLATFORMS=$(echo ${{ inputs.PLATFORMS }} | jq -Rc 'split(",")') 
+          echo result=$PLATFORMS >> "$GITHUB_OUTPUT"
 
       - name: Generate Final Metadata
         id: metadata
