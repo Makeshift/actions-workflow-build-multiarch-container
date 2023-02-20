@@ -1,0 +1,160 @@
+name: Build a single container
+on:
+  workflow_call:
+    inputs:
+      AWS_ECR_REPOSITORY:
+        description: 'The AWS ECR repository to push the container to'
+        required: true
+        type: string
+      DOCKERFILE:
+        description: 'The Dockerfile to build'
+        required: true
+        type: string
+      BUILD_CONTEXT:
+        description: Build context used by the docker builder (. to reference top of Git repo, DOCKERFILE_DIRNAME to reference Dockerfile directory - Either BUILD_CONTEXT or DOCKERFILE or both must be specified)
+        required: false
+        default: DOCKERFILE_DIRNAME
+      BUILD_ARGS:
+        description: 'The build arguments to pass to the Docker build'
+        required: false
+        type: string
+        default: ''
+      ENV_VARS:
+        description: 'The environment variables to pass to the Docker build'
+        required: false
+        type: string
+        default: ''
+      TAG_SUFFIX:
+        description: 'The suffix to append to the tag'
+        required: false
+        type: string
+        default: ''
+      PLATFORMS:
+        description: 'The platforms to build for'
+        required: false
+        type: string
+        default: 'linux/amd64'
+      ARTIFACTS:
+        description: 'Comma separated list of artifacts within the container to upload as build artifacts'
+        required: false
+        type: string
+        default: ''
+      PLATFORM_TO_ARCH_MAP:
+        description: 'A JSON object mapping platform to architecture'
+        required: false
+        type: string
+        default: '{"linux/amd64": "x64", "linux/arm64": "arm64"}'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.5.3
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.ACTIONS_BUILD_CONTAINER_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ACTIONS_BUILD_CONTAINER_ECR_SECRET_ACCESS_KEY }}
+          role-session-name: '${{ github.event.repository.name }}-GithubActions-build.yml'
+          mask-aws-account-id: false
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Calculate Platforms
+        id: calculate-platforms
+        run: echo ${{ inputs.PLATFORMS }} | jq -Rc 'split(",")' >> "$GITHUB_OUTPUT"
+
+      - name: Generate Final Metadata
+        id: metadata
+        uses: docker/metadata-action@v4.1.1
+        with:
+          images: ${{ inputs.AWS_ECR_REPOSITORY }}
+          tags: |
+            # Rather than using type=schedule which only creates a tag on a schedule, we want date tags on every build
+            type=raw,value={{date 'YYYYMMDD'}}${{ inputs.TAG_SUFFIX }}
+            # refs
+            type=ref,event=branch,suffix=${{ inputs.TAG_SUFFIX }}
+            type=ref,event=tag,suffix=${{ inputs.TAG_SUFFIX }}
+            type=ref,event=pr,suffix=${{ inputs.TAG_SUFFIX }}
+            # sha's
+            type=sha,prefix=,suffix=${{ inputs.TAG_SUFFIX }}
+            type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}
+            # set latest tag for master branch
+            type=raw,value=latest,enable=${{ github.ref_name == 'master' || github.ref_name == 'main' }},suffix=${{ inputs.TAG_SUFFIX }}
+
+      # - name: For Each Platform, Generate Metadata
+      #   id: set
+      #   run: |
+      #     PLATFORMS=${{ inputs.PLATFORMS }}
+      #     MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
+      #     IMAGE_SUFFIX=${{ steps.metadata.outputs.}}
+      #     FINAL_IMAGE_LIST=""
+      #     for i in ${PLATFORMS//,/ }; do
+      #       echo "$MAPPING" | jq -r --arg platform "$i" '.[$platform]'
+      #     done
+      #     tag_prefix="${{ steps.metadata.outputs.tags }}"
+
+    outputs:
+      registry: ${{ steps.login-ecr.outputs.registry }}
+      docker_username: ${{ steps.login-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      docker_password: ${{ steps.login-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      platforms: ${{ steps.calculate-platforms.outputs.result }}
+      metadata: ${{ steps.metadata.outputs }}
+
+  # build:
+  #   name: Build Container
+  #   needs: setup
+  #   strategy:
+  #     matrix:
+  #       platform: ${{ fromJSON(inputs.PLATFORMS) }}
+  #   runs-on:
+  #     - self-hosted
+  #     - ${{ fromJSON(PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
+  #   container:
+  #     image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
+  #     credentials:
+  #       username: ${{ needs.login-to-amazon-ecr.outputs.docker_username } }}
+  #       password: ${{ needs.login-to-amazon-ecr.outputs.docker_password }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
+  #       id: metadata
+  #       uses: docker/metadata-action@v4.1.1
+  #       with:
+  #         images: ${{ inputs.AWS_ECR_REPOSITORY }}
+  #         tags: |
+  #           type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}-${{ matrix.platform }}
+
+  #     - name: Build ${{ inputs.DOCKERFILE }}
+  #       uses: ./.github/actions/build-and-push-container
+  #       with:
+  #         AWS_ECR_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+  #         AWS_ECR_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+  #         AWS_ECR_REGION: eu-west-2
+  #         AWS_ECR_REPOSITORY: ${{ inputs.AWS_ECR_REPOSITORY }}
+  #         PLATFORMS: ${{ matrix.platform }}
+  #         DOCKERFILE: ${{ inputs.DOCKERFILE }}
+  #         BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
+  #         BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
+  #         TAG_SUFFIX: ${{ inputs.TAG_SUFFIX }}-${{ matrix.platform }
+  #         ARTIFACTS: ${{ inputs.ARTIFACTS }}
+  #         METADATA: ${{ steps.metadata.outputs }}
+  #         ENV_VARS: ${{ inputs.ENV_VARS }}
+
+  # build_manifest:
+  #   name: Create manifests & Tags
+  #   needs:
+  #     - setup
+  #   runs-on:
+  #     - self-hosted
+  #   steps:
+  #     - name: Create and push manifest images
+  #       uses: Makeshift/docker-manifest-action@master
+  #       with:
+  #         base-image: ${{ needs.setup.outputs.metadata.tags }}
+  #         extra-images: ${{ needs.vars.outputs.image_list }}
+  #         push: true
