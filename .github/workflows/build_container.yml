@@ -100,20 +100,21 @@ jobs:
         run: |
 
           FINAL_IMAGE_TAGS=$(echo ${{ steps.metadata.outputs.tags }} | jq -Rc 'join(",")')
-          first_expected_source_tag=$(echo "${{steps.platform-metadata.outputs.tags[0]}}")
+          echo "FINAL_IMAGE_TAGS=$FINAL_IMAGE_TAGS" >> "$GITHUB_OUTPUT"
+
+          platform_tag_prefix=$(echo "${{fromJSON(steps.platform-metadata.outputs.tags)[0]}}")
 
           PLATFORMS=${{ inputs.PLATFORMS }}
           MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
 
-          echo "$FINAL_IMAGE_TAGS"
-          echo $first_expected_source_tag
-          echo $PLATFORMS
-          echo $MAPPING
+          expected_source_tags=""
 
-          # for i in ${PLATFORMS//,/ }; do
-          #   echo "$MAPPING" | jq -r --arg platform "$i" --arg tag "$first_expected_source_tag" '$tag.[$platform]'
-          # done
-          # tag_prefix="${{ steps.metadata.outputs.tags }}"
+          for i in ${PLATFORMS//,/ }; do
+            new_source_tag=$(echo '$MAPPING' | jq -r --arg platform "$i" --arg tag "$platform_tag_prefix" '.[$platform] | "\($tag)-\(.)"')
+            expected_source_tags="$expected_source_tags,$new_source_tag"
+          done
+
+          echo "EXPECTED_SOURCE_TAGS=$EXPECTED_SOURCE_TAGS" >> "$GITHUB_OUTPUT"
 
     outputs:
       registry: ${{ steps.login-ecr.outputs.registry }}
@@ -121,8 +122,8 @@ jobs:
       docker_password: ${{ steps.login-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       platforms: ${{ steps.calculate-platforms.outputs.result }}
       metadata: ${{ toJson(steps.metadata.outputs) }}
-      final_image_tags: ${{ steps.set.outputs.final_image_tags }}
-      expected_source_tags: ${{ steps.set.outputs.expected_source_tags }}
+      final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
+      expected_source_tags: ${{ steps.set.outputs.EXPECTED_SOURCE_TAGS }}
 
   # build:
   #   name: Build Container
@@ -176,6 +177,6 @@ jobs:
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1
         with:
-          base-image: ${{ needs.setup.outputs.metadata.tags }}
-          extra-images: ${{ needs.vars.outputs.image_list }}
+          base-image: ${{ needs.setup.outputs.final_image_tags }}
+          extra-images: ${{ needs.vars.outputs.expected_source_tags }}
           push: true
