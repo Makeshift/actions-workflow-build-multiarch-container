@@ -99,13 +99,13 @@ jobs:
         id: set
         run: |
 
-          FINAL_IMAGE_TAGS=$(echo ${{ steps.metadata.outputs.tags }} | jq -Rc 'join(",")')
+          FINAL_IMAGE_TAGS=$(echo "${{ steps.metadata.outputs.tags }}" | jq -Rc 'join(",")')
           echo "FINAL_IMAGE_TAGS=$FINAL_IMAGE_TAGS" >> "$GITHUB_OUTPUT"
 
           platform_tag_prefix=$(echo "${{ steps.platform-metadata.outputs.tags }}" | jq -r 'first')
 
           PLATFORMS=${{ inputs.PLATFORMS }}
-          MAPPING=${{ inputs.PLATFORM_TO_ARCH_MAP }}
+          MAPPING="${{ inputs.PLATFORM_TO_ARCH_MAP }}"
 
           expected_source_tags=""
 
