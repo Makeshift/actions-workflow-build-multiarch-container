@@ -1,3 +1,5 @@
+name: Build test_container
+
 on:
   push:
   workflow_call:
