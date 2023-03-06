@@ -40,6 +40,21 @@ on:
         required: false
         type: string
         default: '{"linux/amd64": "x64", "linux/arm64": "arm64"}'
+      TAG_MASTER_AS_LATEST:
+        description: 'If true, tag the image as latest if the branch is `master` or `main`'
+        required: false
+        type: boolean
+        default: true
+      TAG_ALL_AS_LATEST:
+        description: "If true, tag the image as latest no matter what branch we're on"
+        required: false
+        type: boolean
+        default: false
+      TAG_AS_BRANCH_NAME:
+        description: 'Whether to tag the image as the branch name'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   setup:
@@ -73,14 +88,14 @@ jobs:
             # Rather than using type=schedule which only creates a tag on a schedule, we want date tags on every build
             type=raw,value={{date 'YYYYMMDD'}}${{ inputs.TAG_SUFFIX }}
             # refs
-            type=ref,event=branch,suffix=${{ inputs.TAG_SUFFIX }}
+            type=ref,event=branch,enable=${{ inputs.TAG_AS_BRANCH_NAME }},suffix=${{ inputs.TAG_SUFFIX }}
             type=ref,event=tag,suffix=${{ inputs.TAG_SUFFIX }}
             type=ref,event=pr,suffix=${{ inputs.TAG_SUFFIX }}
             # sha's
             type=sha,prefix=,suffix=${{ inputs.TAG_SUFFIX }}
             type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}
             # set latest tag for master branch
-            type=raw,value=latest,enable=${{ github.ref_name == 'master' || github.ref_name == 'main' }},suffix=${{ inputs.TAG_SUFFIX }}
+            type=raw,value=latest,enable=${{ ((github.ref_name == 'master' || github.ref_name == 'main') && inputs.TAG_MASTER_AS_LATEST) || inputs.TAG_ALL_AS_LATEST}},suffix=${{ inputs.TAG_SUFFIX }}
 
       - name: Platform Metadata
         id: platform-metadata

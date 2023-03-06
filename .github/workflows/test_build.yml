@@ -27,3 +27,4 @@ jobs:
       AWS_ECR_REPOSITORY: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gh/bld/psh/test
       DOCKERFILE: test_container/Dockerfile
       PLATFORMS: linux/amd64
+      TAG_MASTER_AS_LATEST: true
