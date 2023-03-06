@@ -56,6 +56,7 @@ jobs:
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
         with:
+          bin_path: $GOPATH/bin/auto-doc
           filename: '.github/workflows/test_build.yml'
           reusable: true
 
