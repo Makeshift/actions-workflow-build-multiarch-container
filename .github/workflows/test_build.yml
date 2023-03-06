@@ -45,7 +45,7 @@ jobs:
       # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
       - name: Download auto-doc
         run: |
-          mkdir -p /tmp
+          mkdir -p /tmp/auto-doc
           oldcd=$(pwd)
           cd /tmp/auto-doc
           git clone https://github.com/andreas-aman/auto-doc.git .
