@@ -16,12 +16,7 @@ on:
         type: string
         default: DOCKERFILE_DIRNAME
       BUILD_ARGS:
-        description: 'The build arguments to pass to the Docker build'
-        required: false
-        type: string
-        default: ''
-      ENV_VARS:
-        description: 'The environment variables to pass to the Docker build'
+        description: 'The build arguments to pass to the Docker build (Newline separated string of KEY=VAR)'
         required: false
         type: string
         default: ''
@@ -31,17 +26,17 @@ on:
         type: string
         default: ''
       PLATFORMS:
-        description: 'The platforms to build for, comma separated'
+        description: 'The platforms to build for (comma separated string)'
         required: false
         type: string
         default: 'linux/amd64'
       ARTIFACTS:
-        description: 'Comma separated list of artifacts within the container to upload as build artifacts'
+        description: 'List of artifacts within the container to upload as build artifacts (comma separated string)'
         required: false
         type: string
         default: ''
       PLATFORM_TO_ARCH_MAP:
-        description: 'A JSON object mapping platform to architecture'
+        description: 'A JSON object mapping platform to architecture (Generally, you should not need to change this)'
         required: false
         type: string
         default: '{"linux/amd64": "x64", "linux/arm64": "arm64"}'
@@ -51,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.5.3
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: eu-west-2
           aws-access-key-id: ${{ secrets.ACTIONS_BUILD_CONTAINER_ECR_ACCESS_KEY_ID }}
@@ -156,9 +151,6 @@ jobs:
       - name: Build ${{ inputs.DOCKERFILE }}
         uses: ./.github/actions/build-and-push-container
         with:
-          AWS_ECR_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_ECR_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_ECR_REGION: eu-west-2
           AWS_ECR_REPOSITORY: ${{ inputs.AWS_ECR_REPOSITORY }}
           PLATFORMS: ${{ matrix.platform }}
           DOCKERFILE: ${{ inputs.DOCKERFILE }}

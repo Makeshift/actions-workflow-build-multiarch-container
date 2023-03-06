@@ -1,16 +1,6 @@
 name: Build and push container
 description: Build and push a container to AWS ECR
 inputs:
-  AWS_ECR_ACCESS_KEY_ID:
-    description: AWS ECR Access Key ID
-    required: true
-  AWS_ECR_SECRET_ACCESS_KEY:
-    description: AWS ECR Secret Access Key
-    required: true
-  AWS_ECR_REGION:
-    description: AWS ECR Region
-    required: false
-    default: eu-west-2
   AWS_ECR_REPOSITORY:
     description: AWS ECR Repository
     required: true
