@@ -165,7 +165,8 @@ jobs:
           BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
           BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
           ARTIFACTS: ${{ inputs.ARTIFACTS }}
-          METADATA: ${{ steps.metadata.outputs }}
+          # GHA doesn't support passing objects as inputs, so we JSONify it and then parse it in the action
+          METADATA: ${{ toJSON(steps.metadata.outputs) }}
           ENV_VARS: ${{ inputs.ENV_VARS }}
 
   build_manifest:
