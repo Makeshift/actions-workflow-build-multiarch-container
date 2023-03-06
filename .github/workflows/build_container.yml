@@ -205,7 +205,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Create and push manifest images
-        uses: Noelware/docker-manifest-action@0.3.1
+        uses: Makeshift/docker-manifest-action@master
         with:
           inputs: ${{ needs.setup.outputs.final_image_tags }}
           images: ${{ needs.setup.outputs.expected_source_tags }}
