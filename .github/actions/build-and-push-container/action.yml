@@ -138,16 +138,3 @@ runs:
     #   with:
     #     name: ${{ steps.dockerfile_underscored.outputs.value }}
     #     path: ${{ steps.output-dir.outputs.value }}
-
-    - name: Output tags
-      if: success()
-      shell: bash
-      id: tags
-      run: |
-        tags=$(echo '${{ inputs.METADATA }}' | jq -r '.["image.name"] | split(",") | join("\n")')
-        echo "value<<EOF" | tee -a $GITHUB_OUTPUT
-        echo "${tags}" | tee -a $GITHUB_OUTPUT
-        echo "EOF" | tee -a $GITHUB_OUTPUT
-        for tag in $tags; do
-          echo '- `'"${prefix}${tag}"'`' | tee -a $GITHUB_STEP_SUMMARY
-        done

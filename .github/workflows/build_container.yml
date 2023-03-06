@@ -193,3 +193,14 @@ jobs:
           base-image: ${{ needs.setup.outputs.final_image_tags }}
           extra-images: ${{ needs.setup.outputs.expected_source_tags }}
           push: true
+
+      - name: Output tags
+        if: success()
+        shell: bash
+        id: tags
+        run: |
+          tags=$(echo '${{ needs.setup.outputs.final_image_tags }}' | jq -r '.["image.name"] | split(",") | join("\n")')
+          echo 'Built container `${{inputs.DOCKERFILE}}` and uploaded to `inputs.AWS_ECR_REPOSITORY` for platforms `${{inputs.PLATFORMS}}` under tags:' | tee -a $GITHUB_STEP_SUMMARY
+          for tag in $tags; do
+            echo '- `'"${prefix}${tag}"'`' | tee -a $GITHUB_STEP_SUMMARY
+          done
