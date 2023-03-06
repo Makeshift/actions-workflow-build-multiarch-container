@@ -159,7 +159,8 @@ jobs:
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
-            type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}
+            # As this build is for a specific platform, we need to add the platform to the tag
+            type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}-${{ matrix.platform }}
 
       - name: Build ${{ inputs.DOCKERFILE }}
         uses: ./.github/actions/build-and-push-container
@@ -170,7 +171,6 @@ jobs:
           BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
           BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
           ARTIFACTS: ${{ inputs.ARTIFACTS }}
-          TAG_SUFFIX: '-${{ matrix.platform }}'
           # GHA doesn't support passing objects as inputs, so we JSONify it and then parse it in the action
           METADATA: ${{ toJSON(steps.metadata.outputs) }}
 
