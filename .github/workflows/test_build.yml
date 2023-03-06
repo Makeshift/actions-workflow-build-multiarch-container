@@ -51,12 +51,11 @@ jobs:
           cd /tmp/auto-doc
           git clone https://github.com/andreas-aman/auto-doc.git .
           sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
-          GOPATH=/tmp/gopath go install
+          go install
           cd "$oldcd"
           rm -rf /tmp/auto-doc
-          echo "BIN_PATH=/tmp/gopath/bin/auto-doc" >> "$GITHUB_OUTPUT"
           /tmp/gopath/bin/auto-doc -h
-          env
+          echo "BIN_PATH=$(which auto-doc)" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
