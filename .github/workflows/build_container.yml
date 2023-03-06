@@ -209,7 +209,7 @@ jobs:
         with:
           inputs: ${{ needs.setup.outputs.final_image_tags }}
           images: ${{ needs.setup.outputs.expected_source_tags }}
-          amend: true
+          amend: false # This can be changed to true once this issue is fixed: https://github.com/Noelware/docker-manifest-action/issues/162
           push: true
 
       - name: Output tags
