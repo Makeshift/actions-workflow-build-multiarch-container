@@ -30,11 +30,11 @@ on:
         required: false
         type: string
         default: 'linux/amd64'
-      ARTIFACTS:
-        description: 'List of artifacts within the container to upload as build artifacts (comma separated string)'
-        required: false
-        type: string
-        default: ''
+      # ARTIFACTS:
+      #   description: 'List of artifacts within the container to upload as build artifacts (comma separated string)'
+      #   required: false
+      #   type: string
+      #   default: ''
       PLATFORM_TO_ARCH_MAP:
         description: 'A JSON object mapping platform to architecture (Generally, you should not need to change this)'
         required: false
@@ -173,7 +173,7 @@ jobs:
           DOCKERFILE: ${{ inputs.DOCKERFILE }}
           BUILD_CONTEXT: ${{ inputs.BUILD_CONTEXT }}
           BUILD_ARGS: ${{ inputs.BUILD_ARGS }}
-          ARTIFACTS: ${{ inputs.ARTIFACTS }}
+          # ARTIFACTS: ${{ inputs.ARTIFACTS }}
           # GHA doesn't support passing objects as inputs, so we JSONify it and then parse it in the action
           METADATA: ${{ toJSON(steps.metadata.outputs) }}
 
@@ -215,8 +215,8 @@ jobs:
       - name: Output tags
         shell: bash
         run: |
-          tags=$(echo '${{ needs.setup.outputs.final_image_tags }}' | jq -r '.["image.name"] | split(",") | join("\n")')
-          echo 'Built container `${{inputs.DOCKERFILE}}` and uploaded to `inputs.AWS_ECR_REPOSITORY` for platforms `${{inputs.PLATFORMS}}` under tags:' | tee -a $GITHUB_STEP_SUMMARY
+          tags=$(echo '${{ needs.setup.outputs.final_image_tags }}' | sed 's/\(.*\),/\1 /' | jq -r '.["image.name"] | split(",") | join("\n")')
+          echo 'Built container `${{inputs.DOCKERFILE}}` and uploaded to `${{inputs.AWS_ECR_REPOSITORY}}` for platforms `${{inputs.PLATFORMS}}` under tags:' | tee -a $GITHUB_STEP_SUMMARY
           for tag in $tags; do
             echo '- `'"${prefix}${tag}"'`' | tee -a $GITHUB_STEP_SUMMARY
           done
