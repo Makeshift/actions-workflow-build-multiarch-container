@@ -1,7 +1,6 @@
 on:
   push:
   workflow_call:
-  workflow_run:
   workflow_dispatch:
 
 jobs:
