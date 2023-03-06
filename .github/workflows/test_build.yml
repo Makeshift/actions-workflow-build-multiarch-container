@@ -38,54 +38,37 @@ jobs:
       DOCKERFILE: test_container/Dockerfile
       PLATFORMS: linux/amd64
       TAG_MASTER_AS_LATEST: true
+# Waiting on https://github.com/tj-actions/auto-doc/pull/405 - I have no idea how to get golang to use a fork
+# generate_docs:
+#   runs-on: ubuntu-latest
+#   needs:
+#     - test_multiple_arch
+#     - test_single_arch
+#   steps:
+#     - name: Checkout
+#       uses: actions/checkout@v2.4.0
+#       with:
+#         fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
-  generate_docs:
-    runs-on: ubuntu-latest
-    needs:
-      - test_multiple_arch
-      - test_single_arch
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
+#     - name: Run auto-doc
+#       uses: tj-actions/auto-doc@reusable
+#       with:
+#         filename: '.github/workflows/test_build.yml'
+#         reusable: true
 
-      # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
-      - name: Download auto-doc
-        id: autodoc
-        run: |
-          mkdir -p /tmp/auto-doc /tmp/gopath
-          oldcd=$(pwd)
-          cd /tmp/auto-doc
-          git clone https://github.com/andreas-aman/auto-doc.git .
-          sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
-          go install
-          cd "$oldcd"
-          rm -rf /tmp/auto-doc
-          BIN_PATH="${GOPATH:-$HOME/go}/bin/auto-doc"
-          "$BIN_PATH" -h
-          echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
+#     - name: Verify Changed files
+#       uses: tj-actions/verify-changed-files@v13.1
+#       id: verify-changed-files
+#       with:
+#         files: |
+#           README.md
 
-      - name: Run auto-doc
-        uses: andreas-aman/auto-doc@reusable
-        with:
-          bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
-          filename: '.github/workflows/test_build.yml'
-          reusable: true
-
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v13.1
-        id: verify-changed-files
-        with:
-          files: |
-            README.md
-
-      - name: Create Pull Request
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        uses: peter-evans/create-pull-request@v3
-        with:
-          base: 'main'
-          title: 'auto-doc: Updated README.md'
-          branch: 'chore/auto-doc-update-readme'
-          commit-message: 'auto-doc: Updated README.md'
-          body: 'auto-doc: Updated README.md'
+#     - name: Create Pull Request
+#       if: steps.verify-changed-files.outputs.files_changed == 'true'
+#       uses: peter-evans/create-pull-request@v3
+#       with:
+#         base: 'main'
+#         title: 'auto-doc: Updated README.md'
+#         branch: 'chore/auto-doc-update-readme'
+#         commit-message: 'auto-doc: Updated README.md'
+#         body: 'auto-doc: Updated README.md'
