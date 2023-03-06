@@ -159,7 +159,6 @@ jobs:
           ARTIFACTS: ${{ inputs.ARTIFACTS }}
           # GHA doesn't support passing objects as inputs, so we JSONify it and then parse it in the action
           METADATA: ${{ toJSON(steps.metadata.outputs) }}
-          ENV_VARS: ${{ inputs.ENV_VARS }}
 
   build_manifest:
     name: Create manifests & Tags
