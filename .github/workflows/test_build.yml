@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_workflow:
+  test_multiple_arch:
     # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
     uses: ./.github/workflows/build_container.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
@@ -16,3 +16,14 @@ jobs:
       AWS_ECR_REPOSITORY: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gh/bld/psh/test
       DOCKERFILE: test_container/Dockerfile
       PLATFORMS: linux/amd64,linux/arm64
+
+  test_single_arch:
+    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
+    uses: ./.github/workflows/build_container.yml
+    # This causes the called workflow to inherit the secrets from the parent workflow (this one)
+    secrets: inherit
+    # Other vars are available, see ./build_container.yml for details
+    with:
+      AWS_ECR_REPOSITORY: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gh/bld/psh/test
+      DOCKERFILE: test_container/Dockerfile
+      PLATFORMS: linux/amd64
