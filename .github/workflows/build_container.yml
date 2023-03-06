@@ -45,7 +45,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials for GHA Build Container
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: eu-west-2
@@ -54,8 +54,21 @@ jobs:
           role-session-name: '${{ github.event.repository.name }}-GithubActions-build.yml'
           mask-aws-account-id: false
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: Login to Amazon ECR for GHA Build Container
+        id: login-gha-build-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Configure AWS credentials for this repository
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
+          mask-aws-account-id: false
+
+      - name: Login to Amazon ECR for this repository
+        id: login-this-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Calculate Platforms
@@ -114,9 +127,11 @@ jobs:
           echo "EXPECTED_SOURCE_TAGS=$expected_source_tags" >> "$GITHUB_OUTPUT"
 
     outputs:
-      registry: ${{ steps.login-ecr.outputs.registry }}
-      docker_username: ${{ steps.login-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
-      docker_password: ${{ steps.login-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      registry: ${{ steps.login-this-ecr.outputs.registry }}
+      gha_build_container_docker_username: ${{ steps.login-gha-build-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      gha_build_container_docker_password: ${{ steps.login-gha-build-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      this_ecr_docker_username: ${{ steps.login-this-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
+      this_ecr_docker_password: ${{ steps.login-this-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       platforms: ${{ steps.calculate-platforms.outputs.result }}
       metadata: ${{ toJson(steps.metadata.outputs) }}
       final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
@@ -132,26 +147,21 @@ jobs:
       - self-hosted
       - ${{ fromJSON(inputs.PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
     container:
+      # This has to be hardcoded, it doesn't support using the output from the setup job
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
-        username: ${{ needs.setup.outputs.docker_username }}
-        password: ${{ needs.setup.outputs.docker_password }}
+        username: ${{ needs.setup.outputs.gha_build_container_docker_username }}
+        password: ${{ needs.setup.outputs.gha_build_container_docker_password }}
     steps:
+      - name: Login to ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ needs.setup.outputs.registry }}
+          username: ${{ needs.setup.outputs.this_ecr_docker_username }}
+          password: ${{ needs.setup.outputs.this_ecr_docker_password }}
+
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-region: eu-west-2
-          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
-          mask-aws-account-id: false
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
         id: metadata
@@ -185,21 +195,15 @@ jobs:
     container:
       image: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gthb/ctns/cntnr/build:latest
       credentials:
-        username: ${{ needs.setup.outputs.docker_username }}
-        password: ${{ needs.setup.outputs.docker_password }}
+        username: ${{ needs.setup.outputs.gha_build_container_docker_username }}
+        password: ${{ needs.setup.outputs.gha_build_container_docker_password }}
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Login to ECR
+        uses: docker/login-action@v2
         with:
-          aws-region: eu-west-2
-          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
-          mask-aws-account-id: false
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+          registry: ${{ needs.setup.outputs.registry }}
+          username: ${{ needs.setup.outputs.this_ecr_docker_username }}
+          password: ${{ needs.setup.outputs.this_ecr_docker_password }}
 
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1
@@ -209,9 +213,7 @@ jobs:
           push: true
 
       - name: Output tags
-        if: success()
         shell: bash
-        id: tags
         run: |
           tags=$(echo '${{ needs.setup.outputs.final_image_tags }}' | jq -r '.["image.name"] | split(",") | join("\n")')
           echo 'Built container `${{inputs.DOCKERFILE}}` and uploaded to `inputs.AWS_ECR_REPOSITORY` for platforms `${{inputs.PLATFORMS}}` under tags:' | tee -a $GITHUB_STEP_SUMMARY
