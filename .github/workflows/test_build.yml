@@ -42,6 +42,17 @@ jobs:
         with:
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
+      # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
+      - name: Download auto-doc
+        run: |
+          mkdir -p /tmp
+          oldcd=$(pwd)
+          cd /tmp/auto-doc
+          git clone https://github.com/andreas-aman/auto-doc.git .
+          sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
+          go install
+          cd "$oldcd"
+
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
         with:
