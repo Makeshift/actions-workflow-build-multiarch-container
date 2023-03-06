@@ -44,21 +44,24 @@ jobs:
 
       # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
       - name: Download auto-doc
+        id: autodoc
         run: |
-          mkdir -p /tmp/auto-doc
+          mkdir -p /tmp/auto-doc /tmp/gopath
           oldcd=$(pwd)
           cd /tmp/auto-doc
           git clone https://github.com/andreas-aman/auto-doc.git .
           sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
-          go install
+          GOPATH=/tmp/gopath go install
           cd "$oldcd"
           rm -rf /tmp/auto-doc
+          echo "BIN_PATH=/tmp/gopath/bin/auto-doc" >> "$GITHUB_OUTPUT"
+          /tmp/gopath/bin/auto-doc -h
           env
 
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
         with:
-          bin_path: $GOPATH/bin/auto-doc
+          bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
           filename: '.github/workflows/test_build.yml'
           reusable: true
 
