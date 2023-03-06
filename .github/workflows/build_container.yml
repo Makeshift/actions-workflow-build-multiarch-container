@@ -58,19 +58,6 @@ jobs:
         id: login-gha-build-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Configure AWS credentials for this repository
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-region: eu-west-2
-          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
-          mask-aws-account-id: false
-
-      - name: Login to Amazon ECR for this repository
-        id: login-this-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Calculate Platforms
         id: calculate-platforms
         run: |
@@ -130,8 +117,6 @@ jobs:
       registry: ${{ steps.login-this-ecr.outputs.registry }}
       gha_build_container_docker_username: ${{ steps.login-gha-build-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       gha_build_container_docker_password: ${{ steps.login-gha-build-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
-      this_ecr_docker_username: ${{ steps.login-this-ecr.outputs.docker_username_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
-      this_ecr_docker_password: ${{ steps.login-this-ecr.outputs.docker_password_099538280162_dkr_ecr_eu_west_2_amazonaws_com }}
       platforms: ${{ steps.calculate-platforms.outputs.result }}
       metadata: ${{ toJson(steps.metadata.outputs) }}
       final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
@@ -153,12 +138,20 @@ jobs:
         username: ${{ needs.setup.outputs.gha_build_container_docker_username }}
         password: ${{ needs.setup.outputs.gha_build_container_docker_password }}
     steps:
-      - name: Login to ECR
-        uses: docker/login-action@v2
+      # Technically we could just log in with our secret key/access key here for ECR but this also authenticates us to use S3
+      #  as a cache location and upload artifacts, so it's required
+      - name: Configure AWS credentials for this repository
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          registry: ${{ needs.setup.outputs.registry }}
-          username: ${{ needs.setup.outputs.this_ecr_docker_username }}
-          password: ${{ needs.setup.outputs.this_ecr_docker_password }}
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
+          mask-aws-account-id: false
+
+      - name: Login to Amazon ECR for this repository
+        id: login-this-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -198,12 +191,18 @@ jobs:
         username: ${{ needs.setup.outputs.gha_build_container_docker_username }}
         password: ${{ needs.setup.outputs.gha_build_container_docker_password }}
     steps:
-      - name: Login to ECR
-        uses: docker/login-action@v2
+      - name: Configure AWS credentials for this repository
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          registry: ${{ needs.setup.outputs.registry }}
-          username: ${{ needs.setup.outputs.this_ecr_docker_username }}
-          password: ${{ needs.setup.outputs.this_ecr_docker_password }}
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          role-session-name: '${{ github.event.repository.name }}-GithubActions-build_container.yml'
+          mask-aws-account-id: false
+
+      - name: Login to Amazon ECR for this repository
+        id: login-this-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1
