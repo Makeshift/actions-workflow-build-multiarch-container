@@ -11,3 +11,10 @@ It currently supports the following architectures:
 ## Usage
 
 For usage details, see `workflows/test_build.yml` in this repository.
+
+## Secrets
+
+Your repository _must_ have the following secrets defined:
+
+  - `AWS_ECR_ACCESS_KEY_ID` - The access key for a service account with push access to the ECR repository
+  - `AWS_ECR_SECRET_ACCESS_KEY` - The secret key for a service account with push access to the ECR repository
