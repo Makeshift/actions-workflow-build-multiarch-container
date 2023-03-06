@@ -61,10 +61,10 @@ jobs:
           sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
           go install
           cd "$oldcd"
-          auto-doc -h || true
-          which auto-doc || true
-          ls ~/go/bin || true
-          echo "BIN_PATH=$(which auto-doc)" >> "$GITHUB_OUTPUT"
+          rm -rf /tmp/auto-doc
+          BIN_PATH="${GOPATH:-$HOME/go}/bin/auto-doc"
+          "$BIN_PATH" -h
+          echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
