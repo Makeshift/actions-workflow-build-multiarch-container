@@ -96,7 +96,7 @@ runs:
     - name: Push Container (${{ inputs.AWS_ECR_REPOSITORY }})
       if: success()
       id: build
-      uses: docker/build-push-action@v3.2.0
+      uses: docker/build-push-action@v4.0.0
       with:
         # See https://github.com/Noelware/docker-manifest-action/issues/131
         provenance: false
