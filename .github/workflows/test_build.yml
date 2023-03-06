@@ -52,6 +52,8 @@ jobs:
           sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
           go install
           cd "$oldcd"
+          rm -rf /tmp/auto-doc
+          env
 
       - name: Run auto-doc
         uses: andreas-aman/auto-doc@reusable
