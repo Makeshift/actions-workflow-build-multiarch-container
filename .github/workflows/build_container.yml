@@ -207,8 +207,9 @@ jobs:
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@0.3.1
         with:
-          base-image: ${{ needs.setup.outputs.final_image_tags }}
-          extra-images: ${{ needs.setup.outputs.expected_source_tags }}
+          images: ${{ needs.setup.outputs.final_image_tags }}
+          inputs: ${{ needs.setup.outputs.expected_source_tags }}
+          amend: true
           push: true
 
       - name: Output tags

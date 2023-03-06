@@ -98,6 +98,8 @@ runs:
       id: build
       uses: docker/build-push-action@v3.2.0
       with:
+        # See https://github.com/Noelware/docker-manifest-action/issues/131
+        provenance: false
         file: ${{ steps.dockerfile.outputs.result }}
         context: ${{ steps.build-context-dirname.outputs.value }}
         tags: ${{ fromJSON(inputs.METADATA).tags }}
