@@ -1,0 +1,13 @@
+on:
+  push:
+  workflow_call:
+  workflow_run:
+  workflow_dispatch:
+
+jobs:
+  test_workflow:
+    uses: ./.github/workflows/build_container.yml
+    with:
+      AWS_ECR_REPOSITORY: 099538280162.dkr.ecr.eu-west-2.amazonaws.com/iea/shared/cr/gh/bld/psh/test
+      DOCKERFILE: test_container/Dockerfile
+      PLATFORMS: linux/amd64,linux/arm64

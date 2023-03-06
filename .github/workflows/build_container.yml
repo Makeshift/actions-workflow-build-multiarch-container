@@ -31,7 +31,7 @@ on:
         type: string
         default: ''
       PLATFORMS:
-        description: 'The platforms to build for'
+        description: 'The platforms to build for, comma separated'
         required: false
         type: string
         default: 'linux/amd64'
