@@ -94,7 +94,7 @@ jobs:
 
       - name: Generate Final Metadata
         id: metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
@@ -112,7 +112,7 @@ jobs:
 
       - name: Platform Metadata
         id: platform-metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
@@ -186,7 +186,7 @@ jobs:
 
       - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
         id: metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
