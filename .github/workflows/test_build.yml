@@ -9,7 +9,7 @@ on:
 
 jobs:
   test_multiple_arch:
-    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
+    # In your workflow, this 'uses' key should be: the-iea/gha-workflow-build-single-container/.github/workflows/build_container.yml@master
     uses: ./.github/workflows/build_container.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
