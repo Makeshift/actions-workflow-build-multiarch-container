@@ -53,8 +53,9 @@ jobs:
           sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
           go install
           cd "$oldcd"
-          rm -rf /tmp/auto-doc
-          /tmp/gopath/bin/auto-doc -h
+          auto-doc -h || true
+          which auto-doc || true
+          ls ~/go/bin || true
           echo "BIN_PATH=$(which auto-doc)" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
