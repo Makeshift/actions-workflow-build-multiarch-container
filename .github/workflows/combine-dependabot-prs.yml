@@ -14,3 +14,4 @@ jobs:
     uses: the-iea/gha-workflow-combine-dependabot-prs/.github/workflows/workflow.yml@master
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
+    permissions: write-all
