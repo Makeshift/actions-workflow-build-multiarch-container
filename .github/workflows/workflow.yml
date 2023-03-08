@@ -1,7 +1,7 @@
 name: Build a single container
-On:
+on:
   workflow_call:
-    Secrets:
+    secrets:
       AWS_ECR_ACCESS_KEY_ID:
         description: "The AWS access key ID to use for the ECR login (must have permissions to push to the repository you're trying to push to)"
         required: true
@@ -14,7 +14,7 @@ On:
       ACTIONS_BUILD_CONTAINER_ECR_SECRET_ACCESS_KEY:
         description: 'The AWS secret access key to use to grab the container built in [the-iea/github-actions-build-container](https://github.com/the-iea/github-actions-build-container) (Provided as an organisation secret within the IEA)'
         required: true
-    Inputs:
+    inputs:
       AWS_ECR_REPOSITORY:
         description: 'The AWS ECR repository to push the container to'
         required: true

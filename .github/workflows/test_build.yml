@@ -68,7 +68,7 @@ jobs:
           echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
-        uses: andreas-aman/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
+        uses: tj-actions/auto-doc@pull/405 # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
         with:
           bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
           filename: '.github/workflows/workflow.yml'
