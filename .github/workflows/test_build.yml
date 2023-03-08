@@ -50,7 +50,6 @@ jobs:
         with:
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
-      # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
       - name: Download auto-doc
         id: autodoc
         env:
@@ -69,7 +68,7 @@ jobs:
           echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
-        uses: andreas-aman/auto-doc@reusable
+        uses: andreas-aman/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
         with:
           bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
           filename: '.github/workflows/test_build.yml'
@@ -86,7 +85,7 @@ jobs:
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: peter-evans/create-pull-request@v3
         with:
-          base: 'main'
+          base: 'master'
           title: 'auto-doc: Updated README.md'
           branch: 'chore/auto-doc-update-readme'
           commit-message: 'auto-doc: Updated README.md'
