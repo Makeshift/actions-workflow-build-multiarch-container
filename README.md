@@ -10,6 +10,17 @@ It currently supports the following architectures:
 
 ## Secrets
 
+<!-- AUTO-DOC-SECRETS:START - Do not remove or modify this section -->
+
+|                    SECRET                     | REQUIRED |                                                                                                       DESCRIPTION                                                                                                       |
+|-----------------------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|   ACTIONS_BUILD_CONTAINER_ECR_ACCESS_KEY_ID   |   true   |   The AWS access key ID to use to grab the container built in [the-iea/github-actions-build-container](https://github.com/the-iea/github-actions-build-container) (Provided as an organisation secret within the IEA)   |
+| ACTIONS_BUILD_CONTAINER_ECR_SECRET_ACCESS_KEY |   true   | The AWS secret access key to use to grab the container built in [the-iea/github-actions-build-container](https://github.com/the-iea/github-actions-build-container) (Provided as an organisation secret within the IEA) |
+|             AWS_ECR_ACCESS_KEY_ID             |   true   |                                                The AWS access key ID to use for the ECR login (must have permissions to push to the repository you're trying to push to)                                                |
+|           AWS_ECR_SECRET_ACCESS_KEY           |   true   |                                              The AWS secret access key to use for the ECR login (must have permissions to push to the repository you're trying to push to)                                              |
+
+<!-- AUTO-DOC-SECRETS:END -->
+
 Your repository _must_ have the following secrets defined:
 
   - `AWS_ECR_ACCESS_KEY_ID` - The access key for a service account with push access to the ECR repository
@@ -50,6 +61,33 @@ See [.github/workflows/test_build.yml](.github/workflows/test_build.yml) for a f
 
 ## Inputs
 
+<!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
+
+|        INPUT         |  TYPE  | REQUIRED |                          DEFAULT                           |                                                                                          DESCRIPTION                                                                                           |
+|----------------------|--------|----------|------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  AWS_ECR_REPOSITORY  | string |   true   |                                                            |                                                                        The AWS ECR repository to push the container to                                                                         |
+|      BUILD_ARGS      | string |  false   |                                                            |                                                     The build arguments to pass to the Docker build (Newline separated string of KEY=VAR)                                                      |
+|    BUILD_CONTEXT     | string |  false   |                   `"DOCKERFILE_DIRNAME"`                   | Build context used by the docker builder (. to reference top of Git repo, DOCKERFILE_DIRNAME to reference Dockerfile directory - Either BUILD_CONTEXT or DOCKERFILE or both must be specified) |
+|      DOCKERFILE      | string |   true   |                                                            |                                                                                    The Dockerfile to build                                                                                     |
+|      PLATFORMS       | string |  false   |                      `"linux/amd64"`                       |                                                                      The platforms to build for (comma separated string)                                                                       |
+| PLATFORM_TO_ARCH_MAP | string |  false   | `"{\"linux/amd64\": \"x64\", \"linux/arm64\": \"arm64\"}"` |                                                 A JSON object mapping platform to architecture (Generally, you should not need to change this)                                                 |
+|  TAG_ALL_AS_LATEST   | string |  false   |                         `"false"`                          |                                                                If true, tag the image as latest no matter what branch we're on                                                                 |
+|  TAG_AS_BRANCH_NAME  | string |  false   |                          `"true"`                          |                                                                          Whether to tag the image as the branch name                                                                           |
+| TAG_MASTER_AS_LATEST | string |  false   |                          `"true"`                          |                                                              If true, tag the image as latest if the branch is `master` or `main`                                                              |
+|      TAG_SUFFIX      | string |  false   |                                                            |                                                                                The suffix to append to the tag                                                                                 |
+
+<!-- AUTO-DOC-INPUT:END -->
+
+
+
+
+
 
 ## Outputs
+
+
+
+
+
+
 
