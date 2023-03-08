@@ -54,7 +54,7 @@ jobs:
       - name: Download auto-doc
         id: autodoc
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p /tmp/auto-doc /tmp/gopath
           oldcd=$(pwd)
