@@ -53,6 +53,8 @@ jobs:
       # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
       - name: Download auto-doc
         id: autodoc
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           mkdir -p /tmp/auto-doc /tmp/gopath
           oldcd=$(pwd)
