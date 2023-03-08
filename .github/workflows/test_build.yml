@@ -39,11 +39,23 @@ jobs:
       PLATFORMS: linux/amd64
       TAG_MASTER_AS_LATEST: true
 
-  generate_docs:
+  log_image_tags:
     runs-on: ubuntu-latest
     needs:
       - test_multiple_arch
       - test_single_arch
+    steps:
+      - name: Log out image tags
+        run: |
+          echo 'Multi-arch image sha: `${{ needs.test_multiple_arch.outputs.image_sha_tag }}`' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Single-arch image sha: `${{ needs.test_single_arch.outputs.image_sha_tag }}`' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Multi-arch all tags: `${{ needs.test_multiple_arch.outputs.all_tags }}`' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Single-arch all tags: `${{ needs.test_single_arch.outputs.all_tags }}`' | tee -a $GITHUB_STEP_SUMMARY
+
+  generate_docs:
+    runs-on: ubuntu-latest
+    needs:
+      - log_image_tags
     steps:
       - name: Checkout
         uses: actions/checkout@v2.4.0
