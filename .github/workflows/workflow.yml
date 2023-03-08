@@ -68,6 +68,13 @@ on:
         required: false
         type: boolean
         default: true
+    outputs:
+      image_tags:
+        description: 'The tags of the image that was built as a stringified JSON array'
+        value: ${{ jobs.build_manifest.outputs.TAG_LIST }}
+      image_sha_tag:
+        description: 'The SHA tag of the image that was built'
+        value: ${{ jobs.setup.outputs.image_sha }}
 
 jobs:
   setup:
@@ -94,7 +101,7 @@ jobs:
 
       - name: Generate Final Metadata
         id: metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
@@ -112,7 +119,7 @@ jobs:
 
       - name: Platform Metadata
         id: platform-metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
@@ -149,6 +156,7 @@ jobs:
       metadata: ${{ toJson(steps.metadata.outputs) }}
       final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
       expected_source_tags: ${{ steps.set.outputs.EXPECTED_SOURCE_TAGS }}
+      image_sha: ${{ fromJSON(steps.platform-metadata.outputs.json).tags[0] }}
 
   build:
     name: Build Container
@@ -186,7 +194,7 @@ jobs:
 
       - name: Platform metadata (${{ inputs.AWS_ECR_REPOSITORY }})
         id: metadata
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v4.3.0
         with:
           images: ${{ inputs.AWS_ECR_REPOSITORY }}
           tags: |
@@ -207,6 +215,8 @@ jobs:
 
   build_manifest:
     name: Create manifests & Tags
+    outputs:
+      TAG_LIST: ${{ steps.output_tags.outputs.TAG_LIST_ARRAY }}
     needs:
       - setup
       - build
@@ -242,9 +252,12 @@ jobs:
 
       - name: Output tags
         shell: bash
+        id: output_tags
         run: |
           tags=$(echo '${{ needs.setup.outputs.final_image_tags }}')
           echo 'Built container `${{inputs.DOCKERFILE}}` and uploaded to `${{inputs.AWS_ECR_REPOSITORY}}` for platforms `${{inputs.PLATFORMS}}` under tags:' | tee -a $GITHUB_STEP_SUMMARY
           IFS=','; for tag in $tags; do
             echo '- `'"${prefix}${tag}"'`' | tee -a $GITHUB_STEP_SUMMARY
           done
+          TAG_LIST_ARRAY=$(echo "$tags" | jq -c --raw-input --slurp 'split(",") | map(select(length>2))')
+          echo "TAG_LIST_ARRAY=$TAG_LIST_ARRAY" >> $GITHUB_OUTPUT

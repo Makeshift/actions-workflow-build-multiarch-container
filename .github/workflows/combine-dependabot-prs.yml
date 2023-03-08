@@ -1,0 +1,16 @@
+name: Combine Dependabot PRs
+
+on:
+  push:
+    paths:
+      - .github/workflows/combine-dependabot-prs.yml
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 9 * * 1' # 09:30 UTC on Monday, 30 minutes after the dependabot PRs are created (using the IEA's default schedule)
+
+jobs:
+  combine_prs:
+    uses: the-iea/gha-workflow-combine-dependabot-prs/.github/workflows/workflow.yml@master
+    # This causes the called workflow to inherit the secrets from the parent workflow (this one)
+    secrets: inherit

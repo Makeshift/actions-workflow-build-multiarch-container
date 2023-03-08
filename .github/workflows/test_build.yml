@@ -2,15 +2,21 @@ name: Build test_container
 
 on:
   push:
-    branches:
-      - master
   workflow_call:
   workflow_dispatch:
 
 jobs:
+  cancel_redundant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Redundant Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
   test_multiple_arch:
-    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
-    uses: ./.github/workflows/build_container.yml
+    # In your workflow, this 'uses' key should be: the-iea/gha-workflow-build-single-container/.github/workflows/workflow.yml@master
+    uses: ./.github/workflows/workflow.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
     # Other vars are available, see README for details
@@ -20,8 +26,8 @@ jobs:
       PLATFORMS: linux/amd64,linux/arm64
 
   test_single_arch:
-    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
-    uses: ./.github/workflows/build_container.yml
+    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/workflow.yml@master
+    uses: ./.github/workflows/workflow.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
     # Other vars are available, see README for details
@@ -31,46 +37,65 @@ jobs:
       PLATFORMS: linux/amd64
       TAG_MASTER_AS_LATEST: true
 
-  generate_docs:
+  log_image_tags:
     runs-on: ubuntu-latest
     needs:
       - test_multiple_arch
       - test_single_arch
+    steps:
+      - name: Log out image tags
+        run: |
+          echo 'Multi-arch image sha: `${{ needs.test_multiple_arch.outputs.image_sha_tag }}`' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Single-arch image sha: `${{ needs.test_single_arch.outputs.image_sha_tag }}`' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Multi-arch all tags: ```${{ needs.test_multiple_arch.outputs.image_tags }}```' | tee -a $GITHUB_STEP_SUMMARY
+          echo 'Single-arch all tags: ```${{ needs.test_single_arch.outputs.image_tags }}```' | tee -a $GITHUB_STEP_SUMMARY
+
+  generate_docs:
+    runs-on: ubuntu-latest
+    needs:
+      - log_image_tags
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
-      # This can be removed when this PR is accepted: https://github.com/tj-actions/auto-doc/pull/405
       - name: Download auto-doc
+        id: autodoc
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p /tmp/auto-doc
+          mkdir -p /tmp/auto-doc /tmp/gopath
           oldcd=$(pwd)
           cd /tmp/auto-doc
-          git clone https://github.com/andreas-aman/auto-doc.git .
-          sed s/tj-actions/andreas-aman/g -i -s go.mod main.go action.yml
+          git clone https://github.com/tj-actions/auto-doc.git .
+          gh pr checkout 405
           go install
           cd "$oldcd"
+          rm -rf /tmp/auto-doc
+          BIN_PATH="${GOPATH:-$HOME/go}/bin/auto-doc"
+          "$BIN_PATH" -h
+          echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Run auto-doc
-        uses: andreas-aman/auto-doc@reusable
+        uses: Makeshift/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
         with:
-          filename: '.github/workflows/test_build.yml'
+          bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
+          filename: '.github/workflows/workflow.yml'
           reusable: true
 
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v8.6
+        uses: tj-actions/verify-changed-files@v13.1
         id: verify-changed-files
         with:
           files: |
             README.md
 
       - name: Create Pull Request
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        uses: peter-evans/create-pull-request@v4
+        if: steps.verify-changed-files.outputs.files_changed == 'true' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: peter-evans/create-pull-request@v3
         with:
-          base: 'main'
+          base: ${{ github.event.repository.default_branch }}
           title: 'auto-doc: Updated README.md'
           branch: 'chore/auto-doc-update-readme'
           commit-message: 'auto-doc: Updated README.md'
