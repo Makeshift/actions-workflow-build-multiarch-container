@@ -21,8 +21,9 @@ on:
         type: string
       DOCKERFILE:
         description: 'The Dockerfile to build'
-        required: true
+        required: false
         type: string
+        default: Dockerfile
       BUILD_CONTEXT:
         description: Build context used by the docker builder (. to reference top of Git repo, DOCKERFILE_DIRNAME to reference Dockerfile directory - Either BUILD_CONTEXT or DOCKERFILE or both must be specified)
         required: false
