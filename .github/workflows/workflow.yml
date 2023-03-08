@@ -202,7 +202,7 @@ jobs:
             type=sha,prefix=,format=long,suffix=${{ inputs.TAG_SUFFIX }}-${{ fromJSON(inputs.PLATFORM_TO_ARCH_MAP)[matrix.platform] }}
 
       - name: Build ${{ inputs.DOCKERFILE }}
-        uses: the-iea/gha-action-build-and-push-container/.github/actions/build-and-push-container/action.yml@master
+        uses: the-iea/gha-action-build-and-push-container@master
         with:
           AWS_ECR_REPOSITORY: ${{ inputs.AWS_ECR_REPOSITORY }}
           PLATFORMS: ${{ matrix.platform }}
