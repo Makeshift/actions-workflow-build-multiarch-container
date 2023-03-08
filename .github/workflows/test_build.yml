@@ -58,6 +58,7 @@ jobs:
           oldcd=$(pwd)
           cd /tmp/auto-doc
           git clone https://github.com/tj-actions/auto-doc.git .
+          gh pr checkout 405
           go install
           cd "$oldcd"
           rm -rf /tmp/auto-doc
