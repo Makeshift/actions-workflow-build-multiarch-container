@@ -2,10 +2,6 @@ name: Build test_container
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    types: [opened, synchronize, reopened]
   workflow_call:
   workflow_dispatch:
 
