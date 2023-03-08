@@ -1,6 +1,9 @@
 name: Combine Dependabot PRs
 
 on:
+  push:
+    paths:
+      - .github/workflows/combine-dependabot-prs.yml
   workflow_call:
   workflow_dispatch:
   schedule:
