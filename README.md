@@ -63,18 +63,18 @@ See [.github/workflows/test_build.yml](.github/workflows/test_build.yml) for a f
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|        INPUT         |  TYPE  | REQUIRED |                          DEFAULT                           |                                                                                          DESCRIPTION                                                                                           |
-|----------------------|--------|----------|------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|  AWS_ECR_REPOSITORY  | string |   true   |                                                            |                                                                        The AWS ECR repository to push the container to                                                                         |
-|      BUILD_ARGS      | string |  false   |                                                            |                                                     The build arguments to pass to the Docker build (Newline separated string of KEY=VAR)                                                      |
-|    BUILD_CONTEXT     | string |  false   |                   `"DOCKERFILE_DIRNAME"`                   | Build context used by the docker builder (. to reference top of Git repo, DOCKERFILE_DIRNAME to reference Dockerfile directory - Either BUILD_CONTEXT or DOCKERFILE or both must be specified) |
-|      DOCKERFILE      | string |   true   |                                                            |                                                                                    The Dockerfile to build                                                                                     |
-|      PLATFORMS       | string |  false   |                      `"linux/amd64"`                       |                                                                      The platforms to build for (comma separated string)                                                                       |
-| PLATFORM_TO_ARCH_MAP | string |  false   | `"{\"linux/amd64\": \"x64\", \"linux/arm64\": \"arm64\"}"` |                                                 A JSON object mapping platform to architecture (Generally, you should not need to change this)                                                 |
-|  TAG_ALL_AS_LATEST   | string |  false   |                         `"false"`                          |                                                                If true, tag the image as latest no matter what branch we're on                                                                 |
-|  TAG_AS_BRANCH_NAME  | string |  false   |                          `"true"`                          |                                                                          Whether to tag the image as the branch name                                                                           |
-| TAG_MASTER_AS_LATEST | string |  false   |                          `"true"`                          |                                                              If true, tag the image as latest if the branch is `master` or `main`                                                              |
-|      TAG_SUFFIX      | string |  false   |                                                            |                                                                                The suffix to append to the tag                                                                                 |
+|        INPUT         |  TYPE  | REQUIRED |                          DEFAULT                           |                                                                                                  DESCRIPTION                                                                                                  |
+|----------------------|--------|----------|------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  AWS_ECR_REPOSITORY  | string |   true   |                                                            |                                                                              The AWS ECR repository to push<br>the container to                                                                               |
+|      BUILD_ARGS      | string |  false   |                                                            |                                                         The build arguments to pass to<br> the Docker build (Newline separated string<br>of KEY=VAR)                                                          |
+|    BUILD_CONTEXT     | string |  false   |                   `"DOCKERFILE_DIRNAME"`                   | Build context used by the docker<br> builder (. to reference top of<br> Git repo, DOCKERFILE_DIRNAME to reference Dockerfile<br> directory - Either BUILD_CONTEXT or DOCKERFILE<br>or both must be specified) |
+|      DOCKERFILE      | string |   true   |                                                            |                                                                                            The Dockerfile to build                                                                                            |
+|      PLATFORMS       | string |  false   |                      `"linux/amd64"`                       |                                                                            The platforms to build for (comma<br>separated string)                                                                             |
+| PLATFORM_TO_ARCH_MAP | string |  false   | `"{\"linux/amd64\": \"x64\", \"linux/arm64\": \"arm64\"}"` |                                                     A JSON object mapping platform to<br> architecture (Generally, you should not need<br>to change this)                                                     |
+|  TAG_ALL_AS_LATEST   | string |  false   |                         `"false"`                          |                                                                    If true, tag the image as<br> latest no matter what branch we're<br>on                                                                     |
+|  TAG_AS_BRANCH_NAME  | string |  false   |                          `"true"`                          |                                                                                Whether to tag the image as<br>the branch name                                                                                 |
+| TAG_MASTER_AS_LATEST | string |  false   |                          `"true"`                          |                                                                  If true, tag the image as<br> latest if the branch is `master`<br>or `main`                                                                  |
+|      TAG_SUFFIX      | string |  false   |                                                            |                                                                                      The suffix to append to the<br>tag                                                                                       |
 
 <!-- AUTO-DOC-INPUT:END -->
 
@@ -84,6 +84,8 @@ See [.github/workflows/test_build.yml](.github/workflows/test_build.yml) for a f
 
 
 ## Outputs
+
+
 
 
 
