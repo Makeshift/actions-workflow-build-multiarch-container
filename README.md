@@ -48,7 +48,7 @@ By default, images are tagged with the following (This behaviour can be changed 
 ```yaml
 jobs:
   test_multiple_arch:
-    uses: the-iea/gha-build-container/.github/workflows/build_container.yml@master
+    uses: the-iea/gha-workflow-build-single-container/.github/workflows/build_container.yml@master
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
     # Other vars are available, see README for details
