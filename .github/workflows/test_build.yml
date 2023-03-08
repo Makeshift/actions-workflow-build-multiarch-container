@@ -17,8 +17,8 @@ jobs:
           access_token: ${{ github.token }}
 
   test_multiple_arch:
-    # In your workflow, this 'uses' key should be: the-iea/gha-workflow-build-single-container/.github/workflows/build_container.yml@master
-    uses: ./.github/workflows/build_container.yml
+    # In your workflow, this 'uses' key should be: the-iea/gha-workflow-build-single-container/.github/workflows/workflow.yml@master
+    uses: ./.github/workflows/workflow.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
     # Other vars are available, see README for details
@@ -28,8 +28,8 @@ jobs:
       PLATFORMS: linux/amd64,linux/arm64
 
   test_single_arch:
-    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/build_container.yml@master
-    uses: ./.github/workflows/build_container.yml
+    # In your workflow, this 'uses' key should be: the-iea/gha-build-container/.github/workflows/workflow.yml@master
+    uses: ./.github/workflows/workflow.yml
     # This causes the called workflow to inherit the secrets from the parent workflow (this one)
     secrets: inherit
     # Other vars are available, see README for details
@@ -71,7 +71,7 @@ jobs:
         uses: andreas-aman/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
         with:
           bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
-          filename: '.github/workflows/build_container.yml'
+          filename: '.github/workflows/workflow.yml'
           reusable: true
 
       - name: Verify Changed files
