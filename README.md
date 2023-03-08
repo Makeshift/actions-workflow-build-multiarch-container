@@ -85,6 +85,15 @@ See [.github/workflows/test_build.yml](.github/workflows/test_build.yml) for a f
 
 ## Outputs
 
+<!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
+
+|    OUTPUT     |                    VALUE                    |                               DESCRIPTION                               |
+|---------------|---------------------------------------------|-------------------------------------------------------------------------|
+| image_sha_tag |     ${{ jobs.setup.outputs.image_sha }}     |               The SHA tag of the image<br>that was built                |
+|  image_tags   | ${{ jobs.build_manifest.outputs.TAG_LIST }} | The tags of the image that<br> was built as a stringified JSON<br>array |
+
+<!-- AUTO-DOC-OUTPUT:END -->
+
 
 
 
