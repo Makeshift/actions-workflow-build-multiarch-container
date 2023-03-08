@@ -259,5 +259,5 @@ jobs:
           IFS=','; for tag in $tags; do
             echo '- `'"${prefix}${tag}"'`' | tee -a $GITHUB_STEP_SUMMARY
           done
-          TAG_LIST_ARRAY=$(echo "$tags" | jq -c --raw-input --slurp 'split(",") | map(select(. != "" && . != null && . != "\\n" && . != " "))')
+          TAG_LIST_ARRAY=$(echo "$tags" | jq -c --raw-input --slurp 'split(",") | map(select(length>2))')
           echo "TAG_LIST_ARRAY=$TAG_LIST_ARRAY" >> $GITHUB_OUTPUT
