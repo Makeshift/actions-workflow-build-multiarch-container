@@ -156,7 +156,7 @@ jobs:
       metadata: ${{ toJson(steps.metadata.outputs) }}
       final_image_tags: ${{ steps.set.outputs.FINAL_IMAGE_TAGS }}
       expected_source_tags: ${{ steps.set.outputs.EXPECTED_SOURCE_TAGS }}
-      image_sha: ${{ fromJSON(steps.platform-metadata.outputs.tags)[0] }}
+      image_sha: ${{ fromJSON(steps.platform-metadata.outputs.json).tags[0] }}
 
   build:
     name: Build Container
