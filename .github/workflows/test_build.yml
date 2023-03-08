@@ -71,7 +71,7 @@ jobs:
         uses: andreas-aman/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
         with:
           bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
-          filename: '.github/workflows/test_build.yml'
+          filename: '.github/workflows/build_container.yml'
           reusable: true
 
       - name: Verify Changed files
