@@ -60,27 +60,9 @@ jobs:
         with:
           fetch-depth: 0 # otherwise, you will fail to push refs to dest repo
 
-      - name: Download auto-doc
-        id: autodoc
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p /tmp/auto-doc /tmp/gopath
-          oldcd=$(pwd)
-          cd /tmp/auto-doc
-          git clone https://github.com/tj-actions/auto-doc.git .
-          gh pr checkout 405
-          go install
-          cd "$oldcd"
-          rm -rf /tmp/auto-doc
-          BIN_PATH="${GOPATH:-$HOME/go}/bin/auto-doc"
-          "$BIN_PATH" -h
-          echo "BIN_PATH=$BIN_PATH" >> "$GITHUB_OUTPUT"
-
       - name: Run auto-doc
-        uses: Makeshift/auto-doc@reusable # Should be replaced when this PR is merged: https://github.com/tj-actions/auto-doc/pull/405
+        uses: tj-actions/auto-doc@v2.2.3
         with:
-          bin_path: ${{ steps.autodoc.outputs.BIN_PATH }}
           filename: '.github/workflows/workflow.yml'
           reusable: true
 
