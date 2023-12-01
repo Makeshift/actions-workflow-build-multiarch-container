@@ -92,7 +92,7 @@ jobs:
 
       - name: Login to Amazon ECR for GHA Build Container
         id: login-gha-build-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Calculate Platforms
         id: calculate-platforms
@@ -188,7 +188,7 @@ jobs:
 
       - name: Login to Amazon ECR for this repository
         id: login-this-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -241,7 +241,7 @@ jobs:
 
       - name: Login to Amazon ECR for this repository
         id: login-this-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Create and push manifest images
         uses: Noelware/docker-manifest-action@master
